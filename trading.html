@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>منصة DELTA - الواجهة الاحترافية</title>
+    <style>
+        html, body { background-color: #000000; color: #ffffff; margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow-x: hidden; }
+        
+        /* شريط التنقل السفلي الموحد الفخم */
+        .bottom-nav { 
+            position: fixed; bottom: 0; left: 0; right: 0; height: 65px; 
+            background-color: #141416; border-top: 1px solid #22252a; 
+            display: flex; justify-content: space-around; align-items: center; z-index: 9999;
+        }
+        .nav-tab { color: #777e90; text-decoration: none; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 33%; height: 100%; transition: 0.2s; }
+        .nav-tab.active { color: #f3a41c; }
+        .nav-tab span { font-size: 20px; margin-bottom: 4px; }
+
+        /* حاويات الأقسام */
+        .app-section { display: none; padding-bottom: 80px; width: 100%; }
+        .app-section.active { display: block; }
+
+        /* شريط الرصيد العلوي */
+        .global-balance-bar {
+            background-color: #141416; padding: 12px 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #22252a; font-size: 14px; position: sticky; top: 0; z-index: 1000;
+        }
+        .balance-value { font-weight: bold; color: #f3a41c; font-family: monospace; font-size: 18px; }
+
+        /* قسم التداول */
+        .chart-container { width: 100%; height: 420px; background-color: #141416; border-bottom: 1px solid #22252a; }
+        .container { padding: 15px; }
+        .trading-panel { background-color: #141416; padding: 15px; border-radius: 12px; border: 1px solid #22252a; margin-bottom: 15px; }
+        .input-row { display: flex; align-items: center; justify-content: space-between; background-color: #1c1e22; padding: 10px 14px; border-radius: 8px; border: 1px solid #2b2f36; margin-bottom: 10px; }
+        .input-row input { background: none; border: none; color: white; font-size: 16px; text-align: left; width: 50%; outline: none; }
+        .buttons-row { display: flex; gap: 12px; margin-top: 15px; }
+        .btn { flex: 1; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; color: white; cursor: pointer; }
+        .btn-buy { background-color: #00b47d; }
+        .btn-sell { background-color: #ef4444; }
+        
+        /* الصفقات */
+        .trades-panel { background-color: #141416; padding: 15px; border-radius: 12px; border: 1px solid #22252a; }
+        .trade-card { background-color: #1c1e22; border-left: 5px solid #00b47d; padding: 12px; border-radius: 8px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .trade-card.sell { border-left-color: #ef4444; }
+        .tp-btn { background-color: #f3a41c; color: black; border: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; }
+
+        /* ================= تصميم المحفظة المستوحى من Bybit ================= */
+        .bybit-wallet-card { padding: 20px 5px; margin-bottom: 15px; }
+        .bybit-title { color: #777e90; font-size: 14px; margin-bottom: 5px; }
+        .bybit-balance { font-size: 38px; font-weight: bold; font-family: monospace; color: #ffffff; display: flex; align-items: baseline; gap: 5px; }
+        .bybit-balance span { font-size: 18px; color: #777e90; font-weight: normal; }
+        .bybit-pnl { color: #00b47d; font-size: 13px; margin-top: 5px; font-weight: 500; }
+        
+        /* أزرار سحب وإيداع فقط بدون خيارات تحويل */
+        .bybit-actions { display: flex; gap: 15px; margin: 25px 0; }
+        .bybit-btn { flex: 1; padding: 14px; border-radius: 25px; border: none; font-size: 15px; font-weight: bold; cursor: pointer; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .bybit-btn-deposit { background-color: #f3a41c; color: #000000; }
+        .bybit-btn-withdraw { background-color: #22252a; color: #ffffff; border: 1px solid #32373f; }
+
+        /* شاشة صفحة الإيداع بالـ QR والكود الحقيقي لقابلية النسخ */
+        .deposit-screen { background-color: #141416; border: 1px solid #22252a; border-radius: 12px; padding: 20px; text-align: center; display: none; margin-bottom: 20px; }
+        .network-badge { background-color: #1c1e22; border: 1px solid #f3a41c; color: #f3a41c; padding: 8px 15px; border-radius: 6px; font-weight: bold; display: inline-block; margin-bottom: 15px; font-size: 14px; }
+        .qr-box { background-color: #ffffff; padding: 12px; display: inline-block; border-radius: 10px; margin-bottom: 15px; }
+        .qr-box img { width: 160px; height: 160px; display: block; }
+        .address-container { background-color: #1c1e22; border: 1px solid #2b2f36; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center; }
+        .address-text { font-family: monospace; font-size: 13px; color: #ffffff; word-break: break-all; display: block; margin-bottom: 10px; line-height: 1.4; user-select: all; }
+        .copy-btn { background-color: rgba(243, 164, 28, 0.15); color: #f3a41c; border: 1px solid #f3a41c; padding: 6px 15px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
+        .copy-btn:active { background-color: #f3a41c; color: #000000; }
+
+        /* شاشة السحب */
+        .withdraw-screen { background-color: #141416; border: 1px solid #22252a; border-radius: 12px; padding: 20px; display: none; margin-bottom: 20px; }
+        .submit-btn { width: 100%; padding: 14px; border: none; border-radius: 8px; color: white; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+        /* الاستثمار */
+        .invest-card { background-color: #1c1e22; border: 1px solid #22252a; border-radius: 12px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .invest-badge { background-color: rgba(243, 164, 28, 0.15); color: #f3a41c; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="global-balance-bar">
+        <div>الرصيد المتاح: <span class="balance-value" id="wallet-balance">$0.00</span></div>
+        <div style="font-size: 12px; color: #777e90; font-weight: bold;">Delta Live</div>
+    </div>
+
+    <div id="trading-sec" class="app-section active">
+        <div class="chart-container">
+            <div id="tradingview_advanced_chart" style="width: 100%; height: 100%;"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+            <script type="text/javascript">
+                new TradingView.widget({
+                    "autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "1", "timezone": "Etc/UTC",
+                    "theme": "dark", "style": "1", "locale": "ar", "toolbar_bg": "#141416",
+                    "hide_side_toolbar": false, "allow_symbol_change": true, "container_id": "tradingview_advanced_chart"
+                });
+            </script>
+        </div>
+        <div class="container">
+            <div class="trading-panel">
+                <div class="input-row">
+                    <label style="color:#777e90;">حجم اللوت (Lot):</label>
+                    <input type="number" id="trade-lot" value="0.10" step="0.01" min="0.01">
+                    <span style="color: #f3a41c; font-weight: bold;">LOT</span>
+                </div>
+                <div class="input-row">
+                    <label style="color:#777e90;">الرصيد المستخدم:</label>
+                    <input type="number" id="trade-amount" value="50">
+                    <span style="color: #f3a41c; font-weight: bold;">USDT</span>
+                </div>
+                <div class="buttons-row">
+                    <button class="btn btn-buy" onclick="openTrade('BUY')">شراء (BUY)</button>
+                    <button class="btn btn-sell" onclick="openTrade('SELL')">بيع (SELL)</button>
+                </div>
+            </div>
+            <div class="trades-panel">
+                <h4 style="margin: 0; color:#777e90;">الصفقات المفتوحة (<span id="active-trades-count">0</span>)</h4>
+                <div id="trades-list">
+                    <p style="color: #777e90; text-align: center; font-size: 14px; margin: 10px 0;" id="no-trades-msg">لا توجد صفقات مفتوحة حالياً.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="wallet-sec" class="app-section">
+        <div class="container">
+            
+            <div class="bybit-wallet-card">
+                <div class="bybit-title">إجمالي الأصول (USD) 👁️</div>
+                <div class="bybit-balance" id="wallet-card-balance">0.00 <span>USD</span></div>
+                <div class="bybit-pnl">قيمة الأرباح والخسائر (P&L) لليوم: 0.00 USD (0%)</div>
+            </div>
+
+            <div class="bybit-actions">
+                <button class="bybit-btn bybit-btn-deposit" onclick="openWalletScreen('dep')">📥 إيداع</button>
+                <button class="bybit-btn bybit-btn-withdraw" onclick="openWalletScreen('with')">📤 سحب</button>
+            </div>
+            
+            <div class="deposit-screen" id="bybit-dep-screen">
+                <h3 style="margin: 0 0 15px 0; font-size:16px;">إيداع USDT</h3>
+                <div class="network-badge">الشبكة: TRON (TRC20)</div>
+                
+                <div class="qr-box">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=TW3JwSUWMe5fGi8aRBiWwpnBpadKN1kY94" alt="QR Code">
+                </div>
+                
+                <div class="address-container">
+                    <span style="color:#777e90; font-size:12px; display:block; margin-bottom:5px;">عنوان المحفظة الخاص بك:</span>
+                    <span class="address-text" id="my-crypto-address">TW3JwSUWMe5fGi8aRBiWwpnBpadKN1kY94</span>
+                    <button class="copy-btn" onclick="copyCryptoAddress()">نسخ العنوان</button>
+                </div>
+                
+                <p style="color:#777e90; font-size:12px; margin:0; line-height:1.4; font-weight: bold;">* الحد الأدنى لمبلغ الإيداع هو 50 USDT.<br><span style="font-weight: normal; font-size: 11px;">سيتم تحديث رصيدك تلقائياً فور تأكيد المعاملة من الإدارة.</span></p>
+            </div>
+
+            <div class="withdraw-screen" id="bybit-with-screen">
+                <h3 style="margin:0 0 15px 0; font-size:16px;">سحب على السلسلة (USDT)</h3>
+                <form action="/api/withdraw" method="POST">
+                    <div style="color:#777e90; font-size:13px; margin-bottom:5px;">عنوان السحب الموجه إليه:</div>
+                    <div class="input-row">
+                        <input type="text" placeholder="أدخل أو اضغط مطولاً للصق عنوان السحب" required style="width:100%; text-align:right;">
+                    </div>
+                    
+                    <div style="color:#777e90; font-size:13px; margin:10px 0 5px 0;">الكمية المراد سحبها:</div>
+                    <div class="input-row">
+                        <input type="number" name="amount" placeholder="الحد الأدنى لمبلغ السحب 10 USDT" min="10" required step="0.01">
+                        <span style="color:#ef4444; font-weight:bold;">USDT</span>
+                    </div>
+                    <button type="submit" class="submit-btn" style="background-color:#f3a41c; color:black;">تأكيد السحب</button>
+                </form>
+            </div>
+
+            <div class="trades-panel" style="margin-top:15px;">
+                <h4 style="margin:0 0 10px 0; color:#777e90; border-bottom:1px solid #22252a; padding-bottom:5px;">تاريخ العمليات الأخير</h4>
+                <div id="history-list">__INSERT_HISTORY__</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="invest-sec" class="app-section">
+        <div class="container">
+            <h3 style="margin-top:0; font-size:18px;">باقات وعوائد الاستثمار</h3>
+            <div class="invest-card">
+                <div>
+                    <h4 style="margin:0 0 5px 0;">باقة دلتا الفضية</h4>
+                    <span class="invest-badge">عائد 5.00% يومياً</span>
+                </div>
+                <button class="tp-btn">استثمار</button>
+            </div>
+            <div class="invest-card">
+                <div>
+                    <h4 style="margin:0 0 5px 0;">باقة دلتا الماسية</h4>
+                    <span class="invest-badge">عائد 40.00% أسبوعياً</span>
+                </div>
+                <button class="tp-btn">استثمار</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div id="tab-invest" class="nav-tab" onclick="switchSection('invest')"><span>💼</span>الاستثمار</div>
+        <div id="tab-trading" class="nav-tab active" onclick="switchSection('trading')"><span>📊</span>التداول</div>
+        <div id="tab-wallet" class="nav-tab" onclick="switchSection('wallet')"><span>💳</span>المحفظة</div>
+    </div>
+
+    <script>
+        let activeTrades = [];
+        let mockBtcPrice = 65000;
+        let baseBalance = 1000.00; 
+
+        function initBalance() {
+            document.getElementById('wallet-balance').innerText = `$${baseBalance.toFixed(2)}`;
+            document.getElementById('wallet-card-balance').innerHTML = `${baseBalance.toFixed(2)} <span>USD</span>`;
+        }
+        initBalance();
+
+        function switchSection(secName) {
+            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            
+            if(secName === 'trading') {
+                document.getElementById('trading-sec').classList.add('active');
+                document.getElementById('tab-trading').classList.add('active');
+            } else if(secName === 'wallet') {
+                document.getElementById('wallet-sec').classList.add('active');
+                document.getElementById('tab-wallet').classList.add('active');
+            } else if(secName === 'invest') {
+                document.getElementById('invest-sec').classList.add('active');
+                document.getElementById('tab-invest').classList.add('active');
+            }
+        }
+
+        function openWalletScreen(type) {
+            let dep = document.getElementById('bybit-dep-screen');
+            let withScr = document.getElementById('bybit-with-screen');
+            if(type === 'dep') {
+                dep.style.display = dep.style.display === 'block' ? 'none' : 'block';
+                withScr.style.display = 'none';
+            } else {
+                withScr.style.display = withScr.style.display === 'block' ? 'none' : 'block';
+                dep.style.display = 'none';
+            }
+        }
+
+        function copyCryptoAddress() {
+            let addressText = document.getElementById('my-crypto-address').innerText;
+            navigator.clipboard.writeText(addressText).then(() => {
+                alert('تم نسخ عنوان المحفظة بنجاح: ' + addressText);
+            }).catch(err => {
+                alert('فشل النسخ التلقائي، يمكنك نسخه يدوياً.');
+            });
+        }
+
+        setInterval(() => {
+            mockBtcPrice += (Math.random() - 0.5) * 30;
+            updateLiveTrades(mockBtcPrice);
+        }, 500);
+
+        function openTrade(type) {
+            let lot = parseFloat(document.getElementById('trade-lot').value);
+            let amount = parseFloat(document.getElementById('trade-amount').value);
+            if (!lot || lot <= 0 || !amount || amount <= 0) { alert('أدخل بيانات صحيحة!'); return; }
+            if (baseBalance < amount) { alert('رصيدك المتاح لا يكفي لفتح هذه الصفقة!'); return; }
+
+            baseBalance -= amount;
+            let trade = { id: Date.now(), type: type, lot: lot, amount: amount, entryPrice: mockBtcPrice, profit: 0 };
+            activeTrades.push(trade);
+            document.getElementById('no-trades-msg').style.display = 'none';
+            updateLiveTrades(mockBtcPrice);
+        }
+
+        function updateLiveTrades(price) {
+            let tradesList = document.getElementById('trades-list');
+            let totalFloatingProfit = 0;
+
+            activeTrades.forEach(trade => {
+                let priceDiff = price - trade.entryPrice;
+                let pipValueMultiplier = 1000; 
+                let calculatedProfit = (priceDiff / trade.entryPrice) * trade.lot * pipValueMultiplier;
+                trade.profit = (trade.type === 'BUY') ? calculatedProfit : -calculatedProfit;
+                totalFloatingProfit += trade.profit;
+
+                let tradeRow = document.getElementById(`trade-${trade.id}`);
+                if (!tradeRow) {
+                    tradeRow = document.createElement('div');
+                    tradeRow.id = `trade-${trade.id}`;
+                    tradesList.appendChild(tradeRow);
+                }
+
+                let profitSign = trade.profit >= 0 ? '+' : '';
+                let displayColor = trade.profit >= 0 ? '#00b47d' : '#ef4444';
+
+                tradeRow.className = `trade-card ${trade.type === 'SELL' ? 'sell' : ''}`;
+                tradeRow.innerHTML = `
+                    <div>
+                        <strong style="color:${trade.type === 'BUY' ? '#00b47d' : '#ef4444'}">${trade.type === 'BUY' ? 'BUY 🔵' : 'SELL 🔴'}</strong>
+                        <div style="font-size: 11px; color: #777e90; margin-top:3px;">لوت: ${trade.lot} | حجز: $${trade.amount}</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="tp-btn" onclick="takeProfitManual(${trade.id})">اغلاق</button>
+                        <span class="status-profit" style="color:${displayColor}">${profitSign}$${trade.profit.toFixed(2)}</span>
+                    </div>
+                `;
+            });
+
+            document.getElementById('active-trades-count').innerText = activeTrades.length;
+            let currentLiveWallet = baseBalance + totalFloatingProfit;
+            
+            document.getElementById('wallet-balance').innerText = `$${currentLiveWallet.toFixed(2)}`;
+            document.getElementById('wallet-card-balance').innerHTML = `${currentLiveWallet.toFixed(2)} <span>USD</span>`;
+        }
+
+        function takeProfitManual(id) {
+            let tradeIndex = activeTrades.findIndex(t => t.id === id);
+            if (tradeIndex !== -1) {
+                let trade = activeTrades[tradeIndex];
+                baseBalance += (trade.amount + trade.profit);
+                activeTrades.splice(tradeIndex, 1);
+                let rowToRemove = document.getElementById(`trade-${id}`);
+                if (rowToRemove) rowToRemove.remove();
+                if (activeTrades.length === 0) document.getElementById('no-trades-msg').style.display = 'block';
+                updateLiveTrades(mockBtcPrice);
+            }
+        }
+    </script>
+</body>
+</html>

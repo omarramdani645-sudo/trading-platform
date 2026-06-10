@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول</title>
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%) !important;
+            color: #f0f6fc; font-family: Arial, sans-serif;
+            display: flex; justify-content: center; align-items: center; direction: rtl;
+        }
+        .card {
+            background: #1f242c; border: 1px solid #30363d;
+            padding: 30px; border-radius: 12px; width: 90%; max-width: 360px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); box-sizing: border-box;
+        }
+        h2, h3 { color: #f0a500; text-align: center; margin-top: 0; }
+        input {
+            width: 100%; padding: 12px; margin-bottom: 15px;
+            background: #262e36; border: 1px solid #444; color: #fff;
+            border-radius: 6px; box-sizing: border-box; text-align: center; font-size: 15px;
+        }
+        button {
+            width: 100%; padding: 12px; border: none; font-weight: bold;
+            border-radius: 6px; cursor: pointer; font-size: 16px; margin-bottom: 10px;
+        }
+        .btn-login { background: #f0a500; color: #000; }
+        .btn-reg { background: #238636; color: #fff; }
+        hr { border: 0; border-top: 1px solid #333; margin: 20px 0; }
+    </style>
+    <script>
+        // التحقق من بقاء تسجيل الدخول لمرة واحدة
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            window.location.href = '/trading.html';
+        }
+
+        function loginDirect() {
+            const username = document.getElementById('log-user').value;
+            const password = document.getElementById('log-pass').value;
+            if(!username || !password) return alert('الرجاء كتابة اسم المستخدم وكلمة المرور');
+
+            fetch('/api/login-user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            }).then(res => {
+                if(res.ok) {
+                    localStorage.setItem('isLoggedIn', 'true'); // حفظ الدخول لمرة واحدة
+                    window.location.href = '/trading.html';
+                } else {
+                    alert('اسم المستخدم أو كلمة المرور خاطئة!');
+                }
+            });
+        }
+
+        function registerNew() {
+            const username = document.getElementById('reg-user').value;
+            const email = document.getElementById('reg-mail').value;
+            const password = document.getElementById('reg-pass').value;
+            if(!username || !email || !password) return alert('الرجاء تعبئة كافة الحقول المطلوبة');
+
+            fetch('/api/send-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            }).then(res => res.json()).then(data => {
+                const code = prompt("كود التحقق المباشر لحسابك هو: " + data.bypassCode + "\nأدخل الكود هنا للتفعيل:");
+                if (code === data.bypassCode) {
+                    fetch('/api/register-user', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password, email })
+                    }).then(() => {
+                        localStorage.setItem('isLoggedIn', 'true'); // حفظ الدخول لمرة واحدة
+                        window.location.href = '/trading.html';
+                    });
+                } else {
+                    alert('كود التحقق غير صحيح!');
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+
+<div class="card">
+    <h2>تسجيل الدخول للمنصة</h2>
+    <input type="text" id="log-user" placeholder="اسم المستخدم">
+    <input type="password" id="log-pass" placeholder="كلمة المرور">
+    <button class="btn-login" onclick="loginDirect()">دخول</button>
+    
+    <hr>
+    
+    <h3>إنشاء حساب جديد</h3>
+    <input type="text" id="reg-user" placeholder="اسم المستخدم الجديد">
+    <input type="email" id="reg-mail" placeholder="البريد الإلكتروني">
+    <input type="password" id="reg-pass" placeholder="كلمة المرور">
+    <button class="btn-reg" onclick="registerNew()">تسجيل حساب وتفعيل</button>
+</div>
+
+</body>
+</html>
