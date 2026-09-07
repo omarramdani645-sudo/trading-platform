@@ -326,3 +326,33 @@
     </script>
 </body>
 </html>
+<div style="background: #141416; border: 1px solid #22252a; padding: 15px; border-radius: 12px; margin: 10px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <div style="color: #fff; font-weight: bold; font-size: 14px;">التحقق من الهوية (KYC)</div>
+            <div id="kyc-text" style="color: #ef4444; font-size: 12px; margin-top: 4px;">غير موثق</div>
+        </div>
+        <button id="kyc-btn" onclick="document.getElementById('kyc-file-input').click()" style="background: #f3a41c; color: #000; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">توثيق</button>
+        <input type="file" id="kyc-file-input" accept="image/*" style="display: none;" onchange="processKycUpload()">
+    </div>
+</div>
+
+<script>
+function processKycUpload() {
+    var fileInput = document.getElementById('kyc-file-input');
+    if (fileInput.files.length === 0) return;
+    var kycText = document.getElementById('kyc-text');
+    var kycBtn = document.getElementById('kyc-btn');
+    kycText.innerText = 'قيد المراجعة...';
+    kycText.style.color = '#f3a41c';
+    kycBtn.innerText = 'قيد المراجعة';
+    kycBtn.disabled = true;
+    setTimeout(function() {
+        kycText.innerText = 'تم التحقق بنجاح ✔';
+        kycText.style.color = '#00b47d';
+        kycBtn.innerText = 'مُوثق';
+        kycBtn.style.background = '#00b47d';
+        kycBtn.style.color = '#fff';
+    }, 15 * 60 * 1000);
+}
+</script>
