@@ -328,130 +328,70 @@
                 updateLiveTrades(mockBtcPrice);
             }
         }
-        }
-  </script>
-
-  <!-- قسم التحقق من الهوية (KYC) -->
-  <div style="background: #141416; border: 1px solid #22252a; padding: 15px; border-radius: 12px; margin: 15px 10px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-      <div>
-        <div style="color: #fff; font-weight: bold; font-size: 14px;">التحقق من الهوية (KYC)</div>
-        <div id="kyc-text" style="color: #ef4444; font-size: 12px; margin-top: 4px;">غير موثق</div>
-      </div>
-      <button id="kyc-btn" onclick="startKycFlow()" style="background-color: #f3a829; color: #000; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">توثيق الحساب</button>
-    </div>
-
-    <!-- مدخل مخفي لرفع الهوية -->
-    <input type="file" id="id-card-input" accept="image/*" capture="environment" style="display: none;" onchange="onIdCaptured()">
-
-    <!-- حاوية الكاميرا لسيلفي الوجه -->
-    <div id="kyc-camera-container" style="display: none; text-align: center; margin-top: 10px;">
-      <div id="kyc-instruction" style="color: #f3a829; font-size: 13px; font-weight: bold; margin-bottom: 8px;">يرجى تثبيت وجهك...</div>
-      <video id="kyc-video" autoplay playsinline width="100%" style="max-width: 240px; border-radius: 8px; border: 2px solid #f3a829; transform: scaleX(-1);"></video>
-    </div>
-  </div>
-
-  <!-- برمجة التحقق من الهوية والشبكات -->
-  <script>
-  function startKycFlow() {
-    alert("الخطوة 1: يرجى التقاط صورة واضحة لبطاقة الهوية أو جواز السفر");
-    document.getElementById('id-card-input').click();
-  }
-
-  function onIdCaptured() {
-    const input = document.getElementById('id-card-input');
-    if (input.files.length > 0) {
-      alert("تم استلام صورة الهوية بنجاح. الانتقال للخطوة التالية: التحقق من الوجه (السيلفي).");
-      startCameraVerification();
-    }
-  }
-
-  function startCameraVerification() {
-    const container = document.getElementById('kyc-camera-container');
-    const video = document.getElementById('kyc-video');
-    const instruction = document.getElementById('kyc-instruction');
-    const kycBtn = document.getElementById('kyc-btn');
-
-    container.style.display = 'block';
-    kycBtn.style.display = 'none';
-    instruction.innerText = "انظر إلى الأمام مباشرةً...";
-
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-      .then(stream => {
-        video.srcObject = stream;
-        
-        setTimeout(() => {
-          instruction.innerText = "أدر وجهك قليلًا إلى ➡️ اليمين";
-        }, 3000);
-
-        setTimeout(() => {
-          instruction.innerText = "الآن أدر وجهك إلى ⬅️ اليسار";
-        }, 6000);
-
-        setTimeout(() => {
-          instruction.innerText = "جاري معالجة بيانات التحقق...";
-          stream.getTracks().forEach(track => track.stop());
-          container.style.display = 'none';
-          finishKycProcess();
-        }, 9000);
-
-      })
-      .catch(err => {
-        alert("تعذر الوصول إلى الكاميرا. تأكد من إعطاء الصلاحيات اللازمة.");
-        container.style.display = 'none';
-        kycBtn.style.display = 'block';
-      });
-  }
-
-  function finishKycProcess() {
-    const kycText = document.getElementById('kyc-text');
-    const kycBtn = document.getElementById('kyc-btn');
-
-    kycBtn.style.display = 'block';
-    kycText.innerText = 'قيد المراجعة...';
-    kycText.style.color = '#f3a829';
-    kycBtn.innerText = 'قيد المراجعة';
-    kycBtn.style.background = '#333';
-    kycBtn.style.color = '#888';
-    kycBtn.disabled = true;
-
-    setTimeout(function() {
-      kycText.innerText = 'تم التحقق بنجاح ✓';
-      kycText.style.color = '#00b47d';
-      kycBtn.innerText = 'موثق';
-      kycBtn.style.background = '#00b47d';
-      kycBtn.style.color = '#fff';
-    }, 120 * 1000);
-  }
-
-  function switchNetwork(net, address, qrUrl) {
-    const addrElem = document.getElementById('my-crypto-address');
-    if (addrElem) {
-      addrElem.innerText = address;
-    }
-
-    const qrImg = document.querySelector('.qr-box img');
-    if (qrImg) {
-      qrImg.src = qrUrl;
-    }
-
-    ['btn-trc', 'btn-bep', 'btn-erc'].forEach(id => {
-      const btn = document.getElementById(id);
-      if (btn) {
-        btn.style.backgroundColor = '#222';
-        btn.style.color = '#ccc';
-        btn.style.border = '1px solid #444';
-      }
-    });
-
-    let activeId = net === 'TRC20' ? 'btn-trc' : (net === 'BEP20' ? 'btn-bep' : 'btn-erc');
-    const activeBtn = document.getElementById(activeId);
-    if (activeBtn) {
-      activeBtn.style.backgroundColor = '#f3a829';
-      activeBtn.style.color = '#000';
-      activeBtn.style.border = 'none';
-    }
-  }
-  </script>
+    </script>
 </body>
 </html>
+<div style="background: #141416; border: 1px solid #22252a; padding: 15px; border-radius: 12px; margin: 10px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <div style="color: #fff; font-weight: bold; font-size: 14px;">التحقق من الهوية (KYC)</div>
+            <div id="kyc-text" style="color: #ef4444; font-size: 12px; margin-top: 4px;">غير موثق</div>
+        </div>
+        <button id="kyc-btn" onclick="document.getElementById('kyc-file-input').click()" style="background: #f3a41c; color: #000; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">توثيق</button>
+        <input type="file" id="kyc-file-input" accept="image/*" style="display: none;" onchange="processKycUpload()">
+    </div>
+</div>
+
+<script>
+function processKycUpload() {
+    var fileInput = document.getElementById('kyc-file-input');
+    if (fileInput.files.length === 0) return;
+    var kycText = document.getElementById('kyc-text');
+    var kycBtn = document.getElementById('kyc-btn');
+    kycText.innerText = 'قيد المراجعة...';
+    kycText.style.color = '#f3a41c';
+    kycBtn.innerText = 'قيد المراجعة';
+    kycBtn.disabled = true;
+    setTimeout(function() {
+        kycText.innerText = 'تم التحقق بنجاح ✔';
+        kycText.style.color = '#00b47d';
+        kycBtn.innerText = 'مُوثق';
+        kycBtn.style.background = '#00b47d';
+        kycBtn.style.color = '#fff';
+    }, 15 * 60 * 1000);
+}
+</script>
+<script>
+function switchNetwork(net, address, qrUrl) {
+  // تحديث العنوان مباشرة عبر الـ ID الخاص به
+  const addrElem = document.getElementById('my-crypto-address');
+  if (addrElem) {
+    addrElem.innerText = address;
+  }
+
+  // تحديث صورة الـ QR Code
+  const qrImg = document.querySelector('.qr-box img');
+  if (qrImg) {
+    qrImg.src = qrUrl;
+  }
+
+  // إعادة ضبط ألوان الأزرار الثلاثة لتبدو غير نشطة
+  ['btn-trc', 'btn-bep', 'btn-erc'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.style.backgroundColor = '#222';
+      btn.style.color = '#ccc';
+      btn.style.border = '1px solid #444';
+    }
+  });
+
+  // تمييز الزر النشط حالياً باللون الذهبي
+  let activeId = net === 'TRC20' ? 'btn-trc' : (net === 'BEP20' ? 'btn-bep' : 'btn-erc');
+  const activeBtn = document.getElementById(activeId);
+  if (activeBtn) {
+    activeBtn.style.backgroundColor = '#f3a829';
+    activeBtn.style.color = '#000';
+    activeBtn.style.border = 'none';
+  }
+}
+</script>
