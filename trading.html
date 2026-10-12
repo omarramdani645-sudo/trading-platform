@@ -139,7 +139,12 @@
             
             <div class="deposit-screen" id="bybit-dep-screen">
                 <h3 style="margin: 0 0 15px 0; font-size:16px;">إيداع USDT</h3>
-                <div class="network-badge">الشبكة: (TRC20)</div>
+                <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 12px;">
+  <button type="button" id="btn-trc" style="background-color: #f3a829; color: #000; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;" onclick="switchNetwork('TRC20', 'TQom3CTo8zD54HEQboMda3mZVJV2gDQs42', 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=TQom3CTo8zD54HEQboMda3mZVJV2gDQs42')">TRC20</button>
+  <button type="button" id="btn-bep" style="background-color: #222; color: #ccc; border: 1px solid #444; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;" onclick="switchNetwork('BEP20', 'ضع_عنوان_محفظة_BEP20_هنا', 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=ضع_عنوان_محفظة_BEP20_هنا')">BEP20</button>
+  <button type="button" id="btn-erc" style="background-color: #222; color: #ccc; border: 1px solid #444; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;" onclick="switchNetwork('ERC20', 'ضع_عنوان_محفظة_ERC20_هنا', 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=ضع_عنوان_محفظة_ERC20_هنا')">ERC20</button>
+                </div>
+                
                 
                 <div class="qr-box">
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=TW3JwSUWMe5fGi8aRBiWwpnBpadKN1kY94" alt="QR Code">
@@ -354,5 +359,35 @@ function processKycUpload() {
         kycBtn.style.background = '#00b47d';
         kycBtn.style.color = '#fff';
     }, 15 * 60 * 1000);
+}
+</script>
+<script>
+function switchNetwork(net, address, qrUrl) {
+  // تحديث عنوان المحفظة
+  const addrElem = document.querySelector('.by-crypto-address');
+  if (addrElem) addrElem.innerText = address;
+
+  // تحديث صورة الـ QR Code
+  const qrImg = document.querySelector('.qr-box img');
+  if (qrImg) qrImg.src = qrUrl;
+
+  // إعادة ضبط ألوان الأزرار الثلاثة
+  ['btn-trc', 'btn-bep', 'btn-erc'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.style.backgroundColor = '#222';
+      btn.style.color = '#ccc';
+      btn.style.border = '1px solid #444';
+    }
+  });
+
+  // تمييز الزر النشط باللون الذهبي
+  let activeId = net === 'TRC20' ? 'btn-trc' : (net === 'BEP20' ? 'btn-bep' : 'btn-erc');
+  const activeBtn = document.getElementById(activeId);
+  if (activeBtn) {
+    activeBtn.style.backgroundColor = '#f3a829';
+    activeBtn.style.color = '#000';
+    activeBtn.style.border = 'none';
+  }
 }
 </script>
