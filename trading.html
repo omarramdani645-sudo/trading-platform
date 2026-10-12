@@ -363,15 +363,19 @@ function processKycUpload() {
 </script>
 <script>
 function switchNetwork(net, address, qrUrl) {
-  // تحديث عنوان المحفظة
-  const addrElem = document.querySelector('.by-crypto-address');
-  if (addrElem) addrElem.innerText = address;
+  // تحديث العنوان مباشرة عبر الـ ID الخاص به
+  const addrElem = document.getElementById('my-crypto-address');
+  if (addrElem) {
+    addrElem.innerText = address;
+  }
 
   // تحديث صورة الـ QR Code
   const qrImg = document.querySelector('.qr-box img');
-  if (qrImg) qrImg.src = qrUrl;
+  if (qrImg) {
+    qrImg.src = qrUrl;
+  }
 
-  // إعادة ضبط ألوان الأزرار الثلاثة
+  // إعادة ضبط ألوان الأزرار الثلاثة لتبدو غير نشطة
   ['btn-trc', 'btn-bep', 'btn-erc'].forEach(id => {
     const btn = document.getElementById(id);
     if (btn) {
@@ -381,7 +385,7 @@ function switchNetwork(net, address, qrUrl) {
     }
   });
 
-  // تمييز الزر النشط باللون الذهبي
+  // تمييز الزر النشط حالياً باللون الذهبي
   let activeId = net === 'TRC20' ? 'btn-trc' : (net === 'BEP20' ? 'btn-bep' : 'btn-erc');
   const activeBtn = document.getElementById(activeId);
   if (activeBtn) {
